@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "types": [
+      "chrome"
+    ],
+    "outDir": "./extension/js",
+    "target": "es2015",
+    "module": "commonjs",
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "allowJs": true
+  },
+  "include": [
+    "src/popup.js",
+    "src/inject.js",
+    "src/background.js",
+    "src/content.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -6,11 +6,12 @@
         <!-- 关闭按钮 -->
         <div class="button-line">
           <el-button type="text" size="small" :icon="DArrowRight" @click="closeContainer">隐藏</el-button>
+          <el-button type="text" size="small" :icon="FullScreen" @click="fullScreenContainer">全屏</el-button>
         </div>
         <!-- 表格内容 -->
         <el-table border :data="tasks" style="width: 100%;" height="600" row-key="id" :row-class-name="tableRowClassName" v-loading="loading" @row-click="handleRowClick" :cell-style="imageCellStyle">
           <!-- 图片列 -->
-          <el-table-column label="图片" width="80">
+          <el-table-column label="图片" width="70">
             <template #default="{ row }">
               <el-image :src="row.img" fit="contain" class="task-image" style="width: 60px; height: 60px" :preview-src-list="[row.img]" :initial-index="0" hide-on-click-modal>
                 <template #error>
@@ -26,7 +27,7 @@
           </el-table-column>
 
           <!-- 状态列 -->
-          <el-table-column prop="status" label="状态" width="60">
+          <el-table-column prop="status" label="状态" width="80">
             <template #default="{ row }">
               <el-tag :type="statusTagType[row.status]" effect="light" size="small" round>
                 {{ statusText[row.status] }}
@@ -46,7 +47,7 @@
           <!-- 操作列 -->
           <el-table-column label="操作" width="80" fixed="right">
             <template #default="{ row }">
-              <el-button type="primary" size="small" @click.stop="handleAction(row)">重试</el-button>
+              <el-button :disabled="row.status === 'pending' || row.status === 'processing'" type="primary" size="small" @click.stop="handleAction(row)">重试</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -56,8 +57,8 @@
 </template>
 
 <script setup>
-import { ref, computed, h } from 'vue';
-import { Picture, InfoFilled, DArrowRight } from '@element-plus/icons-vue';
+import { ref, computed, h, onMounted, onBeforeUnmount } from 'vue';
+import { Picture, FullScreen, DArrowRight } from '@element-plus/icons-vue';
 import { ElNotification } from 'element-plus';
 
 // 状态配置
@@ -109,7 +110,10 @@ const tableRowClassName = ({ rowIndex }) => {
 
 // 操作处理
 const handleAction = (row) => {
-  ElMessage.info(`操作任务：${row.name}`);
+  window.parent.postMessage({
+    type: 'downloadTask',
+    content: row,
+  }, 'https://web.telegram.org/*');
 };
 
 // 行点击处理
@@ -126,13 +130,51 @@ const handleRowClick = (row, column, event) => {
 // 控制任务管理容器显示与隐藏
 const showContainer = ref(true);
 const closeContainer = () => {
-  console.log('closeContainer');
-  console.log(window.parent.postMessage);
   window.parent.postMessage({
     type: 'closeIframe',
-    content: 'closeIframe',
-  }, '*');
+  }, 'https://web.telegram.org/*');
 };
+
+const fullScreenContainer = () => {
+  window.parent.postMessage({
+    type: 'fullScreenContainer',
+    content: 'fullScreenContainer',
+  }, 'https://web.telegram.org/*');
+};
+
+// 定义消息处理函数
+const handleMessage = (event) => {
+  if (event.origin !== 'https://web.telegram.org/*') return;
+  console.log('收到消息:', event.data)
+  switch (event.data.type) {
+    case 'addTask':
+      addTask(event.data.content);
+      break;
+    case 'modifyTask':
+      modifyTask(event.data.content);
+      break;
+  }
+}
+
+// 添加任务
+const addTask = (task) => {
+  tasks.value.unshift(task);
+};
+
+// 修改任务
+const modifyTask = (task) => {
+  tasks.value = tasks.value.map(t => t.id === task.id ? task : t);
+};
+
+// 组件挂载后注册消息事件监听器
+onMounted(() => {
+  window.addEventListener('message', handleMessage)
+})
+
+// 组件卸载前移除消息事件监听器
+onBeforeUnmount(() => {
+  window.removeEventListener('message', handleMessage)
+})
 </script>
 
 <style scoped>
@@ -213,7 +255,7 @@ const closeContainer = () => {
 
 .task-info {
   display: flex;
-  flex-direction: column;
+  justify-content: flex-start;
   gap: 8px;
 }
 

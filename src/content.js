@@ -54,7 +54,7 @@ document.head.appendChild(animationStyle);
 // 初始化iframe样式
 Object.assign(iframe.style, {
   position: 'fixed',
-  right: '10px',
+  right: '0px',
   bottom: '20px',
   width: '400px',
   height: '600px',
@@ -129,9 +129,7 @@ const toggleIframe = () => {
   }, { once: true });
 };
 
-// 绑定事件
-toggleBtn.addEventListener('click', toggleIframe);
-resizeBtn.addEventListener('click', () => {
+const fullScreenContainer = () => {
   if (isWide) {
     // 如果当前是加宽状态，则恢复为默认宽度
     iframe.style.width = '400px';
@@ -139,11 +137,15 @@ resizeBtn.addEventListener('click', () => {
   } else {
     // 如果当前是默认状态，则加宽 iframe ,设置为#column-center的宽度
     const columnCenter = document.getElementById('column-center');
-    iframe.style.width = columnCenter.clientWidth - 10 + 'px';
+    iframe.style.width = columnCenter.clientWidth + 'px';
     resizeBtn.textContent = '恢复原宽度';
   }
   isWide = !isWide;
-});
+};
+
+// 绑定事件
+toggleBtn.addEventListener('click', toggleIframe);
+resizeBtn.addEventListener('click', fullScreenContainer);
 document.body.appendChild(iframe);
 
 // ESC键关闭支持
@@ -169,6 +171,9 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'closeIframe') {
     // 执行对应操作
     toggleIframe();
+  }
+  if (event.data.type === 'fullScreenContainer') {
+    fullScreenContainer();
   }
 });
 (() => {
