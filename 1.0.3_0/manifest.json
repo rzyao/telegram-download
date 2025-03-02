@@ -1,0 +1,60 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "assets/image/logo.png"
+      },
+      "default_popup": "popup.html",
+      "default_title": "__MSG_appAction__"
+   },
+   "background": {
+      "service_worker": "js/background.js"
+   },
+   "content_scripts": [
+      {
+         "all_frames": true,
+         "css": [
+            "css/teleram/content-teleram.css"
+         ],
+         "js": [
+            "js/content-teleram.js",
+            "js/inject.js"
+         ],
+         "matches": [
+            "https://web.telegram.org/*"
+         ],
+         "run_at": "document_end"
+      }
+   ],
+   "default_locale": "en",
+   "description": "__MSG_appDescription__",
+   "homepage_url": "https://chromewebstore.google.com/detail/%E5%85%8D%E8%B4%B9%E7%9A%84telegram-%E7%94%B5%E6%8A%A5%E7%BE%A4%E8%A7%86%E9%A2%91%E4%B8%8B%E8%BD%BD%E5%99%A8/pnekmfnjbjaddedaednmgegopfcekael?hl=zh-CN&utm_source=ext_sidebar",
+   "host_permissions": [
+      "https://web.telegram.org/*"
+   ],
+   "icons": {
+      "128": "assets/image/logo.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlIcnQNjVgiy8qd5ZeGXcyE1iEQKh5dYX60L/BF9dA+roGDf9AonT+0yIUPj1QEu0xpM3gZgmti/c3u4LVmGYKs5pwlxCh6+8gO8VaHO9I9OoR/DqLSJgd4a1gt9bQ+Tgrh7l9dNQcxIUvUQ3AbAyCvNEaojpScc0j1HfQV3FAZnmDkYJKP+7sWILBrrsSH3Ar0QVGnYRFrr0yAFSbB8ZEZijFgAjUVPL9QQGFiDdZAFRBSbvdIIaOFM6gW9njqWDgOjxh5MHsSizKULcsYRsPhhhXeOxrgad6fbGKWVhjK2TZpA0sHltt3U/LvaERb82yGzoctCevAGOPrOUBVkUwQIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_appName__",
+   "permissions": [
+      "storage"
+   ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0.3",
+   "web_accessible_resources": [
+      {
+         "matches": [
+            "\u003Call_urls>"
+         ],
+         "resources": [
+            "fonts/",
+            "*",
+            "assets/*",
+            "img/*",
+            "content-script.html",
+            "dist/app.js"
+         ]
+      }
+   ]
+}

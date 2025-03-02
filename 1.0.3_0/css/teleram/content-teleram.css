@@ -1,0 +1,249 @@
+* {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.content-teleram-script {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.content-teleram-script .downloadBtnIns {
+  text-align: center;
+  padding: 10px 10px;
+  margin-top: -8px;
+}
+
+.content-teleram-script .downloadBtnIns .download-checkbox-all,
+.content-teleram-script .downloadBtnIns .download-images,
+.content-teleram-script .downloadBtnIns .download-videos {
+  padding: 5px 10px;
+}
+
+.content-teleram-script .downloadBtnIns .jump-downloader {
+  padding: 5px 10px;
+}
+
+.progress-teleram-script {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+
+.progress-teleram-script .down_btn_progress {
+  width: 45%;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background-color: #008aff;
+  color: white;
+  border-radius: 5px;
+  margin: 2px auto;
+}
+
+.download-check-item {
+  width: 23px;
+  height: 23px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background-color: #008aff;
+  z-index: 999;
+  display: inline-block;
+  opacity: 1;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.download-check-item:checked {
+  background-color: #008aff;
+  opacity: 1;
+  z-index: 999;
+}
+
+.download-check-item:checked::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  width: 8px;
+  height: 13px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 1;
+  z-index: 999;
+  font-weight: bold;
+}
+
+input[type="checkbox"].download-check-item {
+  opacity: 1;
+  z-index: 999;
+}
+
+.good-modal-dialog {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  width: 400px;
+}
+
+.modal-content {
+  margin-bottom: 20px;
+  padding-top: 15px;
+}
+
+.modal-content-txt {
+  text-align: center;
+}
+
+.modal-content-head {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modal-buttons {
+  text-align: center;
+  padding-top: 15px;
+  width: 75%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-buttons button {
+  padding: 8px 17px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.modal-buttons button.cancel {
+  background-color: #ccc;
+}
+
+.modal-buttons button.confirm {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.modal-buttons button:hover {
+  background-color: #007bff;
+}
+
+.modal-content-loading {
+  text-align: center;
+  margin-top: -20px;
+}
+
+.modal-content-loading .loading-txt {
+  margin-top: 25px;
+}
+
+.loadEffect {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  margin: 0 auto;
+  padding-bottom: 10px;
+}
+
+.loadEffect span {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #007bff;
+  position: absolute;
+  -webkit-animation: load 1.04s ease infinite;
+}
+
+@-webkit-keyframes load {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+.loadEffect span:nth-child(1) {
+  left: 0;
+  top: 50%;
+  margin-top: -8px;
+  -webkit-animation-delay: 0.13s;
+}
+
+.loadEffect span:nth-child(2) {
+  left: 14px;
+  top: 14px;
+  -webkit-animation-delay: 0.26s;
+}
+
+.loadEffect span:nth-child(3) {
+  left: 50%;
+  top: 0;
+  margin-left: -8px;
+  -webkit-animation-delay: 0.39s;
+}
+
+.loadEffect span:nth-child(4) {
+  top: 14px;
+  right: 14px;
+  -webkit-animation-delay: 0.52s;
+}
+
+.loadEffect span:nth-child(5) {
+  right: 0;
+  top: 50%;
+  margin-top: -8px;
+  -webkit-animation-delay: 0.65s;
+}
+
+.loadEffect span:nth-child(6) {
+  right: 14px;
+  bottom: 14px;
+  -webkit-animation-delay: 0.78s;
+}
+
+.loadEffect span:nth-child(7) {
+  bottom: 0;
+  left: 50%;
+  margin-left: -8px;
+  -webkit-animation-delay: 0.91s;
+}
+
+.loadEffect span:nth-child(8) {
+  bottom: 14px;
+  left: 14px;
+  -webkit-animation-delay: 1.04s;
+}

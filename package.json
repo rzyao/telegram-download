@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "core-js": "^3.41.0",
+    "element-plus": "^2.9.5",
+    "regenerator-runtime": "^0.14.1",
+    "vue-virtual-scroll-list": "^2.3.5"
+  },
+  "scripts": {
+    "build": "vite build --config vite.config.js"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "unplugin-element-plus": "^0.9.1",
+    "vite": "^6.2.0",
+    "vue": "^3.5.13"
+  }
+}

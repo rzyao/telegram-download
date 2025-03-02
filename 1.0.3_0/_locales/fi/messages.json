@@ -1,0 +1,11 @@
+{
+   "appAction": {
+      "message": "Lataa rajoitettuja videoita Telegramista"
+   },
+   "appDescription": {
+      "message": "Lataa yksityisiä kuvia ja videoita Telegram-ryhmistä tai -kanavista ilmaiseksi yhdellä napsautuksella. Telegramin yksityinen videonlataaja verkossa, lataa videoita Telegramin yksityisestä kanavasta."
+   },
+   "appName": {
+      "message": "Lataa rajoitettuja videoita Telegramista"
+   }
+}
