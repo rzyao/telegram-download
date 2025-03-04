@@ -3,7 +3,7 @@
       "default_icon": {
          "128": "assets/image/logo.png"
       },
-      "default_popup": "popup.html",
+      "default_popup": "html/popup.html",
       "default_title": "__MSG_appAction__"
    },
    "background": {
@@ -16,7 +16,7 @@
             "css/teleram/content-teleram.css"
          ],
          "js": [
-            "js/content-teleram.js",
+            "js/content.js",
             "js/inject.js"
          ],
          "matches": [
@@ -52,8 +52,8 @@
             "*",
             "assets/*",
             "img/*",
-            "content-script.html",
-            "dist/app.js"
+            "html/*",
+            "js/*"
          ]
       }
    ]

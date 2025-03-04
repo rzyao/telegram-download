@@ -5,27 +5,34 @@ export default defineConfig({
   plugins: [vue()],
   // 如有需要，可在此处配置构建选项
   build: {
-    outDir: 'extension/js',
+    outDir: './extension/js',
     sourcemap: true,
     rollupOptions: {
       // 定义多入口配置
       input: {
-        background: 'src/background.js',
-        content: 'src/content.ts',
-        popup: 'src/popup.js',
-        inject: 'src/inject.js',
-        main: 'src/main.js'
+        background: './src/background.js',
+        content: './src/content.ts',
+        popup: './src/popup.js',
+        inject: './src/inject.ts',
+        main: './main.js'
       },
       output: {
         entryFileNames: (chunkInfo) => {
           const mapping: Record<string, string> = {
-            background: 'js/background.js',
-            content: 'js/content.js',
-            popup: 'js/popup.js',
-            inject: 'js/inject.js',
-            main: 'js/app.js'
+            background: 'background.js',
+            content: 'content.js',
+            popup: 'popup.js',
+            inject: 'inject.js',
+            main: 'app.js'
           }
           return mapping[chunkInfo.name] || 'js/[name].js'
+        },
+        assetFileNames: (assetInfo) => {
+          const fileName = assetInfo.names[0] || '';
+          if (fileName.endsWith('.css')) {
+            return 'dist/[name][extname]';
+          }
+          return 'dist/[name].[hash][extname]';
         }
       }
     }

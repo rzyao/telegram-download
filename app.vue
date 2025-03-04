@@ -9,7 +9,7 @@
           <el-button type="text" size="small" :icon="FullScreen" @click="fullScreenContainer">全屏</el-button>
         </div>
         <!-- 表格内容 -->
-        <el-table border :data="tasks" style="width: 100%;" height="600" row-key="id" :row-class-name="tableRowClassName" v-loading="loading" @row-click="handleRowClick" :cell-style="imageCellStyle">
+        <el-table border :data="tasks" style="width: 100%" height="600" row-key="id" :row-class-name="tableRowClassName" v-loading="loading" @row-click="handleRowClick" :cell-style="imageCellStyle">
           <!-- 图片列 -->
           <el-table-column label="图片" width="70">
             <template #default="{ row }">
@@ -47,7 +47,7 @@
           <!-- 操作列 -->
           <el-table-column label="操作" width="80" fixed="right">
             <template #default="{ row }">
-              <el-button :disabled="row.status === 'pending' || row.status === 'processing'" type="primary" size="small" @click.stop="handleAction(row)">重试</el-button>
+              <el-button :disabled="row.status === 'pending' || row.status === 'processing' " type="primary" size="small" @click.stop="handleAction(row)">重试</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -63,29 +63,21 @@ import { ElNotification } from 'element-plus';
 
 // 状态配置
 const statusText = {
-  pending: '等待中',  
-  processing: '进行中',
+  pending: '等待中',
+  downloading: '进行中',
   completed: '已完成',
   failed: '已失败'
 };
 
 const statusTagType = {
   pending: 'warning',
-  processing: 'primary',
+  downloading: 'primary',
   completed: 'success',
   failed: 'danger'
 };
 
 // 模拟数据
-const tasks = ref(
-  Array.from({ length: 50 }, (_, i) => ({
-    id: i + 1,
-    name: `任务 ${i + 1}`,
-    img: `https://picsum.photos/200/150?random=${i}`,
-    info: `这是第 ${i + 1} 个任务的详细描述信息，用于测试文本截断效果`,
-    status: ['pending', 'processing', 'completed', 'failed'][i % 4]
-  }))
-);
+const tasks = ref([]);
 
 const loading = ref(false);
 
@@ -110,10 +102,13 @@ const tableRowClassName = ({ rowIndex }) => {
 
 // 操作处理
 const handleAction = (row) => {
-  window.parent.postMessage({
-    type: 'downloadTask',
-    content: row,
-  }, 'https://web.telegram.org/*');
+  window.parent.postMessage(
+    {
+      type: 'downloadTask',
+      content: row
+    },
+    'https://web.telegram.org/*'
+  );
 };
 
 // 行点击处理
@@ -130,51 +125,65 @@ const handleRowClick = (row, column, event) => {
 // 控制任务管理容器显示与隐藏
 const showContainer = ref(true);
 const closeContainer = () => {
-  window.parent.postMessage({
-    type: 'closeIframe',
-  }, 'https://web.telegram.org/*');
+  window.parent.postMessage(
+    {
+      type: 'closeIframe'
+    },
+    'https://web.telegram.org/*'
+  );
 };
 
 const fullScreenContainer = () => {
-  window.parent.postMessage({
-    type: 'fullScreenContainer',
-    content: 'fullScreenContainer',
-  }, 'https://web.telegram.org/*');
+  window.parent.postMessage(
+    {
+      type: 'fullScreenContainer',
+      content: 'fullScreenContainer'
+    },
+    'https://web.telegram.org'
+  );
 };
 
 // 定义消息处理函数
 const handleMessage = (event) => {
-  if (event.origin !== 'https://web.telegram.org/*') return;
-  console.log('收到消息:', event.data)
+  console.log('%c收到消息:', 'color: red; font-weight: bold;', event.data);
+  console.log('%c收到消息', 'color: red; font-weight: bold;', event.origin);
+  console.log(event.origin !== 'https://web.telegram.org');
+  if (event.origin !== 'https://web.telegram.org') return;
+  console.log('%c收到  https://web.telegram.org 消息', 'color: red; font-weight: bold;');
   switch (event.data.type) {
-    case 'addTask':
-      addTask(event.data.content);
+    case 'add_task':
+      addTask(event.data);
       break;
-    case 'modifyTask':
-      modifyTask(event.data.content);
+    case 'down_task_status':
+      modifyTask(event.data);
       break;
   }
-}
+};
 
 // 添加任务
 const addTask = (task) => {
-  tasks.value.unshift(task);
+  const { id, status, info } = task;
+  console.log('%c addTask', 'color: red; font-weight: bold;', task);
+  tasks.value.unshift({ id, status, img: info });
+  console.log('%c tasks', 'color: red; font-weight: bold;', tasks.value);
 };
 
 // 修改任务
 const modifyTask = (task) => {
-  tasks.value = tasks.value.map(t => t.id === task.id ? task : t);
+  console.log('%c modifyTask', 'color: red; font-weight: bold;', task);
+  const { id, status, info } = task;
+  tasks.value = tasks.value.map((t) => (t.id === id ? { ...t, status, info: info + '%' } : t));
 };
 
 // 组件挂载后注册消息事件监听器
 onMounted(() => {
-  window.addEventListener('message', handleMessage)
-})
+  window.addEventListener('message', handleMessage);
+});
 
 // 组件卸载前移除消息事件监听器
 onBeforeUnmount(() => {
-  window.removeEventListener('message', handleMessage)
-})
+  window.removeEventListener('message', handleMessage);
+});
 </script>
 
 <style scoped>

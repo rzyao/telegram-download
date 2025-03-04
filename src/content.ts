@@ -7,10 +7,13 @@ const appContainer = document.createElement('div');
 appContainer.id = '__chrome-extension-app';
 document.body.appendChild(appContainer);
 
+import { getHTMLElement, getHTMLImgElement, getHTMLVideoElement, findHTMLElement, generateUniqueId } from './utils';
+
 // 动态创建隔离环境
 const iframe = document.createElement('iframe');
+iframe.setAttribute('id', 'task-list-iframe');
 iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-iframe.src = chrome.runtime.getURL('../content/content.html');
+iframe.src = chrome.runtime.getURL('../html/content.html');
 
 
 // 动画样式定义
@@ -106,6 +109,8 @@ document.body.appendChild(resizeBtn);
   let isAnimating = false;
   let isWide = false;
 
+
+
   const toggleIframe = () => {
     if (isAnimating) return;
 
@@ -129,6 +134,7 @@ document.body.appendChild(resizeBtn);
       isAnimating = false;
     }, { once: true });
   };
+  toggleIframe();
 
   const fullScreenContainer = () => {
     if (isWide) {
@@ -167,8 +173,6 @@ document.body.appendChild(resizeBtn);
     // 验证消息的来源是否符合预期
     if (event.origin !== expectedOrigin) return;
 
-    // 如果验证通过，则处理消息
-    console.log('验证成功，接收到消息：', event.data);
     if (event.data.type === 'closeIframe') {
       // 执行对应操作
       toggleIframe();
@@ -259,6 +263,7 @@ document.body.appendChild(resizeBtn);
         </button>
     </div>
     `;
+  const statusBoxInnerHTML = `<div class="status-box"/> <div class="download-status"/></div>`;
 
   // 添加下载按钮到指定的父元素
   const appendDownloadButton = (parentElement: HTMLElement, buttonType: string, buttonHtml: string, targetElement: HTMLElement | string) => {
@@ -270,176 +275,57 @@ document.body.appendChild(resizeBtn);
     if (!existingButton) {
       const wrapperDiv = document.createElement('div');
       wrapperDiv.className = `${buttonType}-telegram-script`;
+      const uniqueId = generateUniqueId();
       wrapperDiv.innerHTML = buttonHtml.trim();
-
+      const checkBox = wrapperDiv.querySelector('.download-check-item') as HTMLElement;
+      checkBox?.setAttribute('id', uniqueId);
       if (newElement) {
+        // 添加选择框
         newElement.appendChild(wrapperDiv.firstChild as Node);
+
+
+        if (checkBox) {
+          const wrapperDiv2 = document.createElement('div');
+          wrapperDiv2.className = `${buttonType}-telegram-script`;
+          const uniqueId = generateUniqueId();
+          wrapperDiv2.innerHTML = statusBoxInnerHTML.trim();
+
+          // 添加状态容器
+          const statusBox = wrapperDiv2.querySelector('.status-box') as HTMLElement;
+          statusBox.id = uniqueId;
+          newElement.appendChild(wrapperDiv2.firstChild as Node);
+        }
+
       }
+
     }
-  };
-
-  const statusContainer = `
-    <div class="script_status" style="display: flex; justify-content: center;">
-      <div class="script_status_text" >
-        <span class="script_status_success" style="display: none">
-          <svg t="1740863833146" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1464" width="50" height="50"><path d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512 276.352 85.333333 512 85.333333z m-74.965333 550.4L346.453333 545.152a42.666667 42.666667 0 1 0-60.330666 60.330667l120.704 120.704a42.666667 42.666667 0 0 0 60.330666 0l301.653334-301.696a42.666667 42.666667 0 1 0-60.288-60.330667l-271.530667 271.488z" fill="#52C41A" p-id="1465"></path></svg>
-        </span>
-        <span class="script_status_error" style="display: none">
-          <svg t="1740863922754" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4255" width="50" height="50"><path d="M512 1024C229.23264 1024 0 794.76736 0 512S229.23264 0 512 0s512 229.23264 512 512-229.23264 512-512 512z m0.7168-549.49888L324.93568 286.72 276.48 335.17568 464.26112 522.9568 276.48 710.73792l48.45568 48.45568L512.7168 571.41248 700.49792 759.1936l48.45568-48.45568L561.17248 522.9568 748.9536 335.17568 700.49792 286.72 512.7168 474.50112z" fill="#F4420A" p-id="4256"></path></svg>
-        </span>
-        <span class="script_status_running" style="display: none">
-          <svg t="1740864280083" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="12594" width="50" height="50"><path d="M535.68 512a48 48 0 0 1-14.08 35.2l-142.72 142.72a48 48 0 0 1-67.84-67.84L421.12 512 311.04 401.92a48 48 0 1 1 67.84-67.84l142.72 142.72a48 48 0 0 1 14.08 35.2z" fill="#27BC7A" p-id="12595"></path><path d="M774.4 512a48 48 0 0 1-14.08 35.2l-142.72 142.72a48 48 0 0 1-67.84-67.84L659.84 512 549.76 401.92a48 48 0 0 1 67.84-67.84l142.72 142.72a48 48 0 0 1 14.08 35.2z" fill="#27BC7A" p-id="12596"></path><path d="M512 1024a512 512 0 1 1 512-512 512 512 0 0 1-512 512z m0-96A416 416 0 1 0 96 512 416 416 0 0 0 512 928z" fill="#27BC7A" p-id="12597"></path></svg>
-        </span>
-      </div>
-    </div>
-    `;
-
-  // 添加状态容器到指定的父元素
-  const appendStatusContainer = (parentElement, id) => {
-    const progressContainerElement = document.createElement('div');
-    progressContainerElement.id = id;
-    progressContainerElement.innerHTML = statusContainer.trim();
-    parentElement.appendChild(progressContainerElement);
-  };
-
-  const initStatus = (statusContainerElement: HTMLElement) => {
-    const successElement = statusContainerElement.querySelector('.script_status_success') as HTMLElement;
-    successElement.style.display = 'none';
-    const errorElement = statusContainerElement.querySelector('.script_status_error') as HTMLElement;
-    errorElement.style.display = 'none';
-    const runningElement = statusContainerElement.querySelector('.script_status_running') as HTMLElement;
-    runningElement.style.display = 'none';
   };
 
   const setElementStatus = (id: string, status: string) => {
     const statusContainerElement = document.getElementById(id) as HTMLElement;
+    const statusElement = getHTMLElement(statusContainerElement, '.download-status') as HTMLElement;
     if (statusContainerElement) {
-      initStatus(statusContainerElement);
       switch (status) {
         case 'success':
-          const successElement = statusContainerElement.querySelector('.script_status_success') as HTMLElement;
-          successElement.style.display = 'block';
+          statusElement.setAttribute('class', 'download-status status-success');
           break;
         case 'error':
-          const errorElement = statusContainerElement.querySelector('.script_status_error') as HTMLElement;
-          errorElement.style.display = 'block';
-          break;
-        case 'running':
-          const runningElement = statusContainerElement.querySelector('.script_status_running') as HTMLElement;
-          runningElement.style.display = 'block';
+          statusElement.setAttribute('class', 'download-status status-error');
           break;
       }
     }
   };
 
-  const TaskSList: { id: string; status: string; info: string }[] = [];
-
-  const addTask = (id: string, status: string) => {
-    TaskSList.push({ id, status, info: '' });
-  }
-
-  const saveTaskStatus = (id: string, status: string, info: string) => {
-    if (info === null) {
-      addTask(id, status);
-      return;
+  const sendMessageToIframe = (type: string, id: string | undefined, status: string, info: any) => {
+    console.log('%c sendMessageToIframe', 'color: red; font-weight: bold;', type, id, status, info);
+    if (!id) return;
+    const iframe = document.getElementById('task-list-iframe') as HTMLIFrameElement;
+    console.log('%c iframe', 'color: red; font-weight: bold;', iframe);
+    if (iframe?.contentWindow) {
+      console.log('%c iframe.contentWindow', 'color: red; font-weight: bold;', iframe.contentWindow);
+      // 修改 postMessage 的目标源为 '*'
+      iframe.contentWindow.postMessage({ type, id, status, info }, '*');
     }
-    TaskSList.forEach((item) => {
-      if (item.id === id) {
-        item.status = status;
-        item.info = info;
-      }
-    });
-  };
-
-  document.addEventListener('down_task_status', (event: any) => {
-    saveTaskStatus(event.detail.id, event.detail.status, event.detail.info);
-    setElementStatus(event.detail.id, event.detail.status);
-  });
-
-
-
-
-  // 显示模态对话框
-  const showModalDialog = () => {
-    const modalHtml = `
-              <div id="myModal" class="good-modal-dialog">
-                <span class="modal-close" id="good-modal-close">&#10006;</span>
-                <div class="modal-content-head">${localizedText.dialog.title}</div>
-                <div class="modal-content">
-                  <div class="modal-content-txt">${localizedText.dialog.context}</div>
-                </div>
-                <div class="modal-content-loading">
-                  <div class="loadEffect">
-                    <span></span><span></span><span></span><span></span>
-                    <span></span><span></span><span></span><span></span>
-                  </div>
-                  <div class="loading-txt">${localizedText.dialog.loading}</div>
-                </div>
-                <div class="modal-buttons">
-                    <button class="cancel" id="good-cancel-button">${localizedText.dialog.confirm}</button>
-                    <button class="confirm" id="good-confirm-button">${localizedText.dialog.sure}</button>
-                </div>
-              </div>
-            `;
-
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHtml;
-
-    const closeButton = modalContainer.querySelector('#good-modal-close') as HTMLElement;
-    const confirmButton = modalContainer.querySelector('#good-confirm-button') as HTMLElement;
-    const cancelButton = modalContainer.querySelector('#good-cancel-button') as HTMLElement;
-    const modalDialog = modalContainer.querySelector('.good-modal-dialog') as HTMLElement;
-
-    // 隐藏加载动画
-    const loadingElement = modalContainer.querySelector('.modal-content-loading') as HTMLElement;
-    if (loadingElement) {
-      loadingElement.style.display = 'none';
-    }
-
-    // 关闭按钮事件
-    closeButton.addEventListener('click', () => {
-      if (modalDialog) {
-        (modalDialog as HTMLElement).style.display = 'none';
-        chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_close' });
-      }
-    });
-
-    // 确认按钮事件
-    confirmButton.addEventListener('click', () => {
-      window.open('https://chromewebstore.google.com/detail/telegram-Restricted-conten/kinmpocfdjcofdjfnpiiiohfbabfhhdd', '_blank');
-
-      const contentTxt = modalContainer.querySelector('.modal-content-txt') as HTMLElement;
-      const contentLoading = modalContainer.querySelector('.modal-content-loading') as HTMLElement;
-
-      if (closeButton && confirmButton && cancelButton && contentTxt && contentLoading) {
-        closeButton.style.display = 'none';
-        confirmButton.style.display = 'none';
-        cancelButton.style.display = 'none';
-        contentTxt.style.display = 'none';
-        contentLoading.style.display = 'block';
-      }
-
-      setTimeout(() => {
-        chrome.storage.local.get('lastCountDialog', (data) => {
-          if (data.lastCountDialog) {
-            chrome.storage.local.set({ lastCountDialog: null });
-          }
-        });
-        (modalDialog as HTMLElement).style.display = 'none';
-        chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_none' });
-      }, 20000);
-    });
-
-    // 取消按钮事件
-    cancelButton.addEventListener('click', () => {
-      if (modalDialog) {
-        (modalDialog as HTMLElement).style.display = 'none';
-        chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_cancel' });
-      }
-    });
-
-    // 将模态对话框添加到文档中
-    document.body.appendChild(modalContainer);
   };
 
   // 等待元素加载
@@ -530,8 +416,19 @@ document.body.appendChild(resizeBtn);
     }
   };
 
+
+  /**
+   * 处理视频下载函数handleVideoDownload的可选参数
+   * @param mediaPhotoSrc 媒体图片的src
+   * @param taskId 任务id
+   */
+  interface handleVideoDownloadOptions {
+    mediaPhotoSrc?: string;
+    taskId?: string;
+  }
+
   // 处理视频下载逻辑
-  const handleVideoDownload = async (mediaType, videoUrl, pageUrl, downloadId, fileType, containerElement) => {
+  const handleVideoDownload = async (mediaType: string, videoUrl: string, pageUrl: string, downloadId: string, fileType: string, containerElement: HTMLElement, options: handleVideoDownloadOptions = {}) => {
     console.log('执行handleVideoDownload');
     let lastRequestTime = 0;
     const requestInterval = 500;
@@ -547,12 +444,17 @@ document.body.appendChild(resizeBtn);
       const videoData = JSON.parse(decodedVideoId);
       videoId = videoData.location.id;
     }
+
+    // 监听视频下载进度
     document.addEventListener(videoId + 'video_download_progress', (event: any) => {
-      const progressElement = containerElement.querySelector('.down_btn_progress');
-      const downloadButton = containerElement.querySelector('.down_btn_video');
-      const checkAllDownloadButton = containerElement.querySelector('.check-all-download');
+      console.log('video_download_progress', event);
+
+      const progressElement = containerElement.querySelector('.down_btn_progress') as HTMLElement;
+      const downloadButton = containerElement.querySelector('.down_btn_video') as HTMLElement;
+      const checkAllDownloadButton = containerElement.querySelector('.check-all-download') as HTMLElement;
 
       if (event.detail.progress !== null && event.detail.progress !== '100' && containerElement !== null) {
+        sendMessageToIframe('down_task_status', event.detail.task_id, 'downloading', event.detail.progress);
         let progressValue: number | string = 0;
 
         if (downloadButton !== null) {
@@ -579,44 +481,45 @@ document.body.appendChild(resizeBtn);
         if (checkAllDownloadButton !== null) checkAllDownloadButton.style.display = 'flex';
         if (progressElement !== null) progressElement.style.display = 'none';
       }
+      if (event.detail.progress === '100') {
+        sendMessageToIframe('down_task_status', event.detail.task_id, 'completed', event.detail.progress);
+        setElementStatus(event.detail.task_id, 'success');
+      }
     });
 
-    const fileName = await getFileNameByClipBoard();
-
-    const downloadEventDetail = {
-      type: mediaType,
-      video_src: {
-        video_url: videoUrl,
-        video_id: videoId,
-        page: pageUrl,
-        download_id: downloadId,
-        fileName: fileName
-      }
-    };
-    const videoDownloadEvent = new CustomEvent('video_download', { detail: downloadEventDetail });
-    document.dispatchEvent(videoDownloadEvent);
-    // chrome.runtime.sendMessage({
-    //   action: 'sendAliYun',
-    //   event: 'download_' + fileType,
-    //   params: { url: videoUrl, filename: videoId }
-    // })
+    console.log('%c options', 'color: red; font-weight: bold;', options)
+    if (options?.taskId) {
+      const fileName = await getFileNameByClipBoard();
+      const downloadEventDetail = {
+        type: mediaType,
+        video_src: {
+          video_url: videoUrl,
+          video_id: videoId,
+          page: pageUrl,
+          download_id: downloadId,
+          fileName: fileName,
+          taskId: options.taskId
+        }
+      };
+      window.postMessage(downloadEventDetail, '*');
+      sendMessageToIframe('add_task', options.taskId, 'pending', options.mediaPhotoSrc);
+    }
   };
 
   // 初始化下载按钮事件
-  const initializeDownloadButton = (containerElement, mediaElement, mediaType, downloadIndex) => {
-    const downloadButton = containerElement.querySelector('.down_btn_' + mediaType);
+  const initializeDownloadButton = (containerElement: HTMLElement, mediaElement: HTMLImageElement | HTMLVideoElement, mediaType: string, downloadIndex: number) => {
+    const downloadButton = getHTMLElement(containerElement, '.down_btn_' + mediaType);
     if (downloadButton && mediaElement) {
       const currentUrl = window.location.href;
       const hashIndex = currentUrl.indexOf('#');
-      currentUrl.substring(0, hashIndex); // 这行代码没有实际效果；是否应该存储或使用？
+      currentUrl.substring(0, hashIndex);
       downloadButton.addEventListener('click', (event) => {
-        console.log('initializeDownloadButton   click');
         event.preventDefault();
         event.stopPropagation();
         if (mediaType === 'video') {
-          handleVideoDownload('single', mediaElement.src, currentUrl, downloadIndex + 1, 'video', containerElement);
+          handleVideoDownload('single', mediaElement.src, currentUrl, String(downloadIndex + 1), 'video', containerElement);
         } else if (mediaType === 'img') {
-          handleVideoDownload('single', mediaElement.src, currentUrl, downloadIndex + 1, 'image', containerElement);
+          handleVideoDownload('single', mediaElement.src, currentUrl, String(downloadIndex + 1), 'image', containerElement);
         } else {
           console.error('Unsupported media type:', mediaType);
         }
@@ -625,19 +528,22 @@ document.body.appendChild(resizeBtn);
   };
 
   // 点击事件延时处理
-  const clickWithTimeout = (element, timeout = 500) =>
+  const clickWithTimeout = (element: HTMLElement, timeout = 500) =>
     new Promise((resolve, reject) => {
       element.click();
       setTimeout(resolve, timeout);
     });
 
   // 处理相册媒体（优化版）
-  const processAlbumMedia = (mediaElement: HTMLElement, downloadIndex: number, containerElement: HTMLElement): Promise<void> => {
+  const processAlbumMedia = (mediaElement: HTMLElement, downloadIndex: string, containerElement: HTMLElement): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
-      (async () => {  // 添加 async IIFE
+      (async () => {
         try {
           const parent = mediaElement.parentNode as HTMLElement;
-          const albumMedia = parent.querySelector('.album-item-media') as HTMLElement;
+          const statusBox = parent.querySelector('.status-box');
+          const taskId = statusBox?.getAttribute('id') || undefined;
+          const albumMedia = getHTMLElement(parent, '.album-item-media') as HTMLElement;
+          const mediaPhotoSrc = albumMedia.querySelector('.media-photo')?.getAttribute('src') || '';
           albumMedia.click();
 
           const mediaViewerContainer = await waitForElement('.media-viewer-movers');
@@ -700,7 +606,7 @@ document.body.appendChild(resizeBtn);
             await clickMenuWithRetry();
           } else {
             console.log('检测到stream视频源，开始下载 handleVideoDownload');
-            handleVideoDownload('single', videoSrc, window.location.href, downloadIndex + 1, 'video', containerElement);
+            handleVideoDownload('single', videoSrc, window.location.href, downloadIndex + 1, 'video', containerElement, { taskId, mediaPhotoSrc });
           }
 
           // 统一关闭查看器
@@ -737,7 +643,7 @@ document.body.appendChild(resizeBtn);
       // 查找消息气泡中的图片元素
       const imageElement = messageBubble.querySelector('.media-photo') as HTMLImageElement;
       // 查找消息气泡中的脚本内容
-      const scriptContent = messageBubble.querySelector('.content-teleram-script') as HTMLElement;
+      const scriptContent = messageBubble.querySelector('.content-teleram-script');
       // 查找消息气泡中的视频元素
       const videoElement = messageBubble.querySelector('.media-video') as HTMLVideoElement;
       // 查找消息气泡中的相册项
@@ -760,21 +666,22 @@ document.body.appendChild(resizeBtn);
           appendDownloadButton(messageBubble, 'video', videoDownloadButton, 'attachment');
 
           // 为视频下载按钮添加点击事件
-          const downBtnVideo = messageBubble.querySelector('.down_btn_video') as HTMLElement;
+          const downBtnVideo = getHTMLElement(messageBubble, '.down_btn_video') as HTMLElement;
           downBtnVideo?.addEventListener('click', (event) => {
             console.log('messageBubble   click');
             event.preventDefault();
             event.stopPropagation();
 
             // 模拟点击图片以打开视频查看器
-            const mediaPhoto = messageBubble.querySelector('.media-photo') as HTMLElement;
+            const mediaPhoto = getHTMLElement(messageBubble, '.media-photo') as HTMLImageElement;
+            const mediaPhotoSrc = mediaPhoto.src;
             mediaPhoto?.click();
 
             setTimeout(() => {
               // 获取媒体查看器容器
-              const mediaViewerContainer = document.querySelector('.media-viewer-movers') as HTMLElement;
+              const mediaViewerContainer = getHTMLElement(document, '.media-viewer-movers') as HTMLElement;
               // 获取查看器中的视频元素
-              const videoInViewer = mediaViewerContainer.querySelector('.media-viewer-aspecter video') as HTMLVideoElement;
+              const videoInViewer = getHTMLVideoElement(mediaViewerContainer, '.media-viewer-aspecter video') as HTMLVideoElement;
               // 如果src包含blob，点击原生按钮下载
               if (videoInViewer.src.includes('blob')) {
                 waitForElements(document, '.quality-download-options-button-menu').then((elements) => {
@@ -787,7 +694,7 @@ document.body.appendChild(resizeBtn);
                         elements[0]?.click();
                         console.log('elements[0] click');
                         setTimeout(() => {
-                          const topbar = document.querySelector('.media-viewer-topbar') as HTMLElement;
+                          const topbar = getHTMLElement(document, '.media-viewer-topbar') as HTMLElement;
                           topbar?.click();
                           console.log('关闭blob视频查看器');
                         }, 500);
@@ -797,9 +704,9 @@ document.body.appendChild(resizeBtn);
                 });
               } else {
                 // 处理视频下载
-                handleVideoDownload('single', videoInViewer.src, window.location.href, index + 1, 'video', messageBubble);
+                handleVideoDownload('single', videoInViewer.src, window.location.href, String(index + 1), 'video', messageBubble, { mediaPhotoSrc: mediaPhotoSrc });
                 // 关闭视频查看器
-                const topbar = document.querySelector('.media-viewer-topbar') as HTMLElement;
+                const topbar = getHTMLElement(document, '.media-viewer-topbar') as HTMLElement;
                 topbar?.click();
               }
             }, 800);
@@ -822,11 +729,11 @@ document.body.appendChild(resizeBtn);
         }
       });
 
-      // 查找所有的下载全部复选框
-      const allDownloadCheckboxes = messageBubble.querySelectorAll('.download-checkbox-all');
+      // 查找所有的下载全部按钮
+      const allDownloadButton = messageBubble.querySelectorAll('.download-checkbox-all');
 
-      // 如果没有下载全部复选框且存在相册项
-      if (allDownloadCheckboxes.length === 0 && messageBubble.querySelector('.album-item') !== null) {
+      // 如果没有下载全部按钮且存在相册项
+      if (allDownloadButton.length === 0 && messageBubble.querySelector('.album-item') !== null) {
         // 添加下载全部按钮
         appendDownloadButton(messageBubble, 'downloadAll', allFilesDownloadButton, messageBubble);
 
@@ -854,10 +761,10 @@ document.body.appendChild(resizeBtn);
               const videoTimeIndicator = checkboxInput.parentNode?.querySelector('.video-time');
               if (videoTimeIndicator === null) {
                 const imageUrl = (checkboxInput.parentNode?.querySelector('.media-photo') as HTMLImageElement).src;
-                handleVideoDownload('single', imageUrl, imageUrl, itemIndex + 1, 'image', messageBubble);
+                handleVideoDownload('single', imageUrl, imageUrl, String(itemIndex + 1), 'image', messageBubble);
               } else {
                 try {
-                  await processAlbumMedia(checkboxInput, itemIndex, messageBubble);
+                  await processAlbumMedia(checkboxInput, String(itemIndex + 1), messageBubble);
                 } catch (error) {
                   console.error(`相册项 ${itemIndex} 下载失败:`, error);
                 }
@@ -873,7 +780,7 @@ document.body.appendChild(resizeBtn);
   };
 
   // 异步获取 Blob 数据
-  const fetchBlobAsync = async (url) => {
+  const fetchBlobAsync = async (url: string) => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -883,7 +790,7 @@ document.body.appendChild(resizeBtn);
     }
   };
 
-  let g = [];
+  let g: any[] = [];
   // 异步处理媒体元素
   const processMediaElementsAsync = async () => {
     const bubbleContentWrappers = document.querySelectorAll('.bubble-content-wrapper') as NodeListOf<HTMLElement>;
@@ -918,9 +825,10 @@ document.body.appendChild(resizeBtn);
           const decodedVideoData = decodeURIComponent(encodedVideoData);
           const videoData = JSON.parse(decodedVideoData);
           const videoSizeMB = (videoData.size / 1048576).toFixed(2);
+
           const videoDetails = {
             index: index,
-            fileName: imageElement.src,
+            fileName: imageElement?.src,
             videoUrl: videoElement.src,
             type: videoData.mimeType,
             size: videoSizeMB + 'MB',
@@ -967,3 +875,5 @@ document.body.appendChild(resizeBtn);
     processMediaElementsAsync();
   }, 5000);
 })();
+
+

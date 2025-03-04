@@ -1,396 +1,60 @@
-const script = document.createElement('script');
-script.src = chrome.runtime.getURL('js/inject.js');
-document.head.appendChild(script);
-import { Vue } from './vue.js'
-(() => {
-  let language = 'zh-CN';
-  const data = { zh: { dialog: { title: '电报视频下载器', context: '你的五星好评是我们前进最大的动力🙏', loading: '正在检测中，请勿关闭当前页面！', sure: '支持一下', confirm: '残忍拒绝', butImg: '下载图片', butVideo: '下载视频', butAllFile: '强制下载', progressText: '下载进度：' } }, en: { dialog: { title: 'Telegram Video Downloader', context: 'Your 5-star rating is our biggest motivation! 🙏', loading: 'Under detection, please do not close the current page!', sure: 'Show Support', confirm: 'No Thanks', butImg: 'DOWNLOAD IMAGE', butVideo: 'DOWNLOAD VIDEO', butAllFile: 'FORCE DOWNLOAD', progressText: 'Download progress:' } } };
-  let localizedText;
-  function getLocalizedData() {
-    return language.includes('zh') ? data['zh'] : data['en'];
-  }
-  function detectUserLanguage() {
-    const userLanguage = navigator.language || navigator.browserLanguage;
-    if (userLanguage) {
-      language = userLanguage;
+function k(x,b){try{const g=x.querySelector(b);if(!g)throw new Error(`未找到匹配的元素，选择器: "${b}"`);if(!(g instanceof HTMLElement))throw new Error(`选择器 "${b}" 返回的元素不是 HTMLElement 类型`);return g}catch(g){return console.error("getHTMLElement 发生错误:",g),null}}function ue(x,b){try{const g=x.querySelector(b);if(!g)throw new Error(`未找到匹配的元素，选择器: "${b}"`);if(!(g instanceof HTMLVideoElement))throw new Error(`选择器 "${b}" 返回的元素不是 HTMLVideoElement 类型`);return g}catch(g){return console.error("getHTMLVideoElement 发生错误:",g),null}}function U(){if(typeof crypto<"u"&&crypto.randomUUID)return crypto.randomUUID();{const x=Date.now().toString(36),b=Math.random().toString(36).substring(2,10);return`${x}-${b}`}}console.log("%c执行content-teleram.js","color:red;background-color:#4fad4f;");const j=document.createElement("script");j.src=chrome.runtime.getURL("js/inject.js");document.head.appendChild(j);const B=document.createElement("div");B.id="__chrome-extension-app";document.body.appendChild(B);const v=document.createElement("iframe");v.setAttribute("id","task-list-iframe");v.setAttribute("sandbox","allow-scripts allow-same-origin");v.src=chrome.runtime.getURL("../html/content.html");const X=document.createElement("style");X.textContent=`
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
     }
   }
-  detectUserLanguage();
-  localizedText = getLocalizedData();
-  const imageDownloadButton = `\n    <div class="content-teleram-script">\n      <div class="downloadBtnIns" style="max-width: 420px; display: flex; justify-content: center;">\n        <button class="download-images  down_btn_img" data-text="FORCE DOWNLOAD" title="Download all resources by default, or please select the resources you want to download in batches" style="color: white; background-color: #008aff; border-radius: 5px;">\n        ${localizedText.dialog.butImg}\n        </button>\n      </div>\n    </div>\n    `
-  const videoDownloadButton = `\n    <div class="content-teleram-script">\n      <div class="downloadBtnIns" style="max-width: 420px; display: flex; justify-content: center;">\n        <button class="download-videos down_btn_video" data-text="FORCE DOWNLOAD" title="Download all resources by default, or please select the resources you want to download in batches" style="color: white; background-color: #008aff; border-radius: 5px;">\n        ${localizedText.dialog.butVideo}\n        </button>\n      </div>\n    </div>\n    `
-  const progressContainer = '\n    <div class="content-teleram-script down_btn_progress"></div>\n    '
-  const downloadCheckbox = '<input type="checkbox" class="download-check-item" name="checkbox-down" checked="true" />'
-  const allFilesDownloadButton = `\n    <div style="max-width: 420px; display: flex; justify-content: center;" class="check-all-download">\n        <button class="download-checkbox-all" data-text="FORCE DOWNLOAD" title="Download all resources by default, or please select the resources you want to download in batches" style="color: white; background-color: #008aff; border-radius: 5px; padding: 5px 10px;">\n        ${localizedText.dialog.butAllFile}\n        </button>\n    </div>\n    `
-  const appendDownloadButton = (parentElement, buttonType, buttonHtml, targetElement) => {
-    let newElement = null;
-    const existingButton = parentElement.querySelector('.down_btn_' + buttonType);
 
-    newElement = targetElement !== 'attachment' ? targetElement : parentElement;
-
-    if (!existingButton) {
-      const wrapperDiv = document.createElement('div');
-      wrapperDiv.className = `${buttonType}-telegram-script`;
-      wrapperDiv.innerHTML = buttonHtml.trim();
-
-      if (newElement) {
-        newElement.appendChild(wrapperDiv.firstChild);
-      }
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
     }
-  };
-  const showModalDialog = () => {
-    const modalHtml = `
-              <div id="myModal" class="good-modal-dialog">
-                <span class="modal-close" id="good-modal-close">&#10006;</span>
-                <div class="modal-content-head">${localizedText.dialog.title}</div>
-                <div class="modal-content">
-                  <div class="modal-content-txt">${localizedText.dialog.context}</div>
-                </div>
-                <div class="modal-content-loading">
-                  <div class="loadEffect">
-                    <span></span><span></span><span></span><span></span>
-                    <span></span><span></span><span></span><span></span>
-                  </div>
-                  <div class="loading-txt">${localizedText.dialog.loading}</div>
-                </div>
-                <div class="modal-buttons">
-                    <button class="cancel" id="good-cancel-button">${localizedText.dialog.confirm}</button>
-                    <button class="confirm" id="good-confirm-button">${localizedText.dialog.sure}</button>
-                </div>
-              </div>
-            `;
-
-    const modalContainer = document.createElement('div');
-    modalContainer.innerHTML = modalHtml;
-
-    const closeButton = modalContainer.querySelector('#good-modal-close');
-    const confirmButton = modalContainer.querySelector('#good-confirm-button');
-    const cancelButton = modalContainer.querySelector('#good-cancel-button');
-    const modalDialog = modalContainer.querySelector('.good-modal-dialog');
-
-    modalContainer.querySelector('.modal-content-loading').style.display = 'none';
-
-    closeButton.addEventListener('click', () => {
-      if (modalDialog) {
-        modalDialog.style.display = 'none';
-        chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_close' });
-      }
-    });
-
-    confirmButton.addEventListener('click', () => {
-      window.open('https://chromewebstore.google.com/detail/telegram-Restricted-conten/kinmpocfdjcofdjfnpiiiohfbabfhhdd', '_blank');
-
-      closeButton.style.display = 'none';
-      confirmButton.style.display = 'none';
-      cancelButton.style.display = 'none';
-      modalContainer.querySelector('.modal-content-txt').style.display = 'none';
-      modalContainer.querySelector('.modal-content-loading').style.display = 'block';
-
-      setTimeout(() => {
-        chrome.storage.local.get('lastCountDialog', (data) => {
-          if (data.lastCountDialog) {
-            chrome.storage.local.set({ lastCountDialog: null });
-          }
-        });
-        modalDialog.style.display = 'none';
-        chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_none' });
-      }, 20000);
-    });
-
-    cancelButton.addEventListener('click', () => {
-      if (modalDialog) {
-        modalDialog.style.display = 'none';
-        chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_cancel' });
-      }
-    });
-
-    document.body.appendChild(modalContainer);
-  };
-  const handleVideoDownload = (mediaType, videoUrl, pageUrl, downloadId, fileType, containerElement) => {
-    chrome.storage.local.get('lastCountDialog', (lastDialogData) => {
-      chrome.storage.local.get('usageCount', (usageCount) => {
-        if (usageCount.usageCount) {
-          const usageStats = usageCount.usageCount;
-          if (
-            lastDialogData.lastCountDialog >= usageStats.limit &&
-            usageStats.popup === true &&
-            lastDialogData.lastCountDialog !== null
-          ) {
-            showModalDialog();
-            document.querySelector('.good-modal-dialog').style.display = 'block';
-            chrome.runtime.sendMessage({ action: 'sendAliYun', event: 'dialog_block' });
-          }
-          else {
-            let lastRequestTime = 0;
-            const requestInterval = 500;
-            let currentTime = new Date().getTime();
-            if (currentTime - lastRequestTime < requestInterval) return;
-            lastRequestTime = currentTime;
-            let videoId = '';
-            if ('video' === fileType) {
-              const streamIndex = videoUrl.indexOf('stream/') + 'stream/'.length
-              const encodedVideoId = videoUrl.substring(streamIndex)
-              const decodedVideoId = decodeURIComponent(encodedVideoId)
-              const videoData = JSON.parse(decodedVideoId)
-              videoId = videoData.location.id
-            }
-            document.addEventListener(videoId + 'video_download_progress', (event) => {
-              const progressElement = containerElement.querySelector('.down_btn_progress');
-              const downloadButton = containerElement.querySelector('.down_btn_video');
-              const checkAllDownloadButton = containerElement.querySelector('.check-all-download');
-
-              if (event.detail.progress !== null && event.detail.progress !== '100' && containerElement !== null) {
-                let progressValue = null;
-
-                if (downloadButton !== null) {
-                  downloadButton.style.display = 'none';
-                  progressValue = event.detail.progress;
-                }
-
-                if (checkAllDownloadButton !== null) {
-                  checkAllDownloadButton.style.display = 'none';
-                  progressValue = Math.max(-1, parseInt(event.detail.progress));
-                }
-
-                if (progressElement === null) {
-                  const progressContainerElement = document.createElement('div');
-                  progressContainerElement.className = 'progress-teleram-script';
-                  progressContainerElement.innerHTML = progressContainer.trim();
-                  containerElement.appendChild(progressContainerElement);
-                } else {
-                  progressElement.style.display = 'block';
-                  progressElement.innerHTML = `${localizedText.dialog.progressText} ${progressValue}%`;
-                }
-              } else {
-                if (downloadButton !== null) downloadButton.style.display = 'block';
-                if (checkAllDownloadButton !== null) checkAllDownloadButton.style.display = 'flex';
-                if (progressElement !== null) progressElement.style.display = 'none';
-              }
-            });
-            const downloadEventDetail = {
-              type: mediaType,
-              video_src: {
-                video_url: videoUrl,
-                video_id: videoId,
-                page: pageUrl,
-                download_id: downloadId
-              }
-            }
-            const videoDownloadEvent = new CustomEvent('video_download', { detail: downloadEventDetail });
-            document.dispatchEvent(videoDownloadEvent)
-            chrome.runtime.sendMessage({
-              action: 'sendAliYun',
-              event: 'download_' + fileType,
-              params: { url: videoUrl, filename: videoId }
-            })
-            if (lastDialogData.lastCountDialog !== null) {
-              chrome.storage.local.set({ lastCountDialog: lastDialogData.lastCountDialog + 1 });
-            }
-          }
-        }
-      });
-    });
-  }
-  const initializeDownloadButton = (containerElement, mediaElement, mediaType, downloadIndex) => {
-    const downloadButton = containerElement.querySelector('.down_btn_' + mediaType);
-    if (downloadButton && mediaElement) {
-      const currentUrl = window.location.href
-      const hashIndex = currentUrl.indexOf('#');
-      currentUrl.substring(0, hashIndex); // This line has no effect; should it be stored or used?
-      downloadButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (mediaType === 'video') {
-          handleVideoDownload('single', mediaElement.src, currentUrl, downloadIndex + 1, 'video', containerElement);
-        } else if (mediaType === 'img') {
-          handleVideoDownload('single', mediaElement.src, currentUrl, downloadIndex + 1, 'image', containerElement);
-        } else {
-          console.error('Unsupported media type:', mediaType);
-        }
-      });
+    to {
+      transform: translateX(0);
+      opacity: 1;
     }
   }
-  const processAlbumMedia = (mediaElement, downloadIndex, containerElement) => {
-    return new Promise((resolve, reject) => {
-      mediaElement.parentNode.querySelector('.album-item-media').click();
 
-      setTimeout(() => {
-        const mediaViewerContainer = document.querySelector('.media-viewer-movers');
-        const videoElement = mediaViewerContainer.querySelector('.media-viewer-aspecter video');
+  .iframe-animation {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-        handleVideoDownload('single', videoElement.src, window.location.href, downloadIndex + 1, 'video', containerElement);
+  .slide-out {
+    animation: slideOutRight 0.5s forwards;
+  }
 
-        document.querySelector('.media-viewer-topbar').click();
-        resolve();
-      }, 300);
-    });
-  };
-  const initializeDownloadHandlers = () => {
-    const messageBubbles = document.querySelectorAll('.bubble-content-wrapper');
-
-    messageBubbles.forEach((messageBubble, index) => {
-      const imageElement = messageBubble.querySelector('.media-photo');
-      const scriptContent = messageBubble.querySelector('.content-teleram-script');
-      const videoElement = messageBubble.querySelector('.media-video');
-      const albumItems = messageBubble.querySelectorAll('.album-item');
-      const videoDuration = messageBubble.querySelector('.video-time');
-
-      if (scriptContent === null && albumItems.length === 0 && imageElement !== null) {
-        if (videoElement !== null && videoDuration !== null) {
-          appendDownloadButton(messageBubble, 'video', videoDownloadButton, 'attachment');
-          initializeDownloadButton(messageBubble, videoElement, 'video', index);
-        }
-
-        if (videoDuration !== null && videoElement === null) {
-          appendDownloadButton(messageBubble, 'video', videoDownloadButton, 'attachment');
-
-          messageBubble.querySelector('.down_btn_video').addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            messageBubble.querySelector('.media-photo').click();
-
-            setTimeout(() => {
-              const mediaViewerContainer = document.querySelector('.media-viewer-movers');
-              const videoInViewer = mediaViewerContainer.querySelector('.media-viewer-aspecter video');
-
-              handleVideoDownload('single', videoInViewer.src, window.location.href, index + 1, 'video', messageBubble);
-              document.querySelector('.media-viewer-topbar').click();
-            }, 800);
-          });
-        }
-
-        if (videoDuration === null && videoElement === null) {
-          appendDownloadButton(messageBubble, 'img', imageDownloadButton, 'attachment');
-          initializeDownloadButton(messageBubble, imageElement, 'img', index);
-        }
-      }
-
-      albumItems.forEach((albumItem) => {
-        const hasDownloadCheckbox = albumItem.querySelector('.download-check-item');
-        if (!hasDownloadCheckbox) {
-          appendDownloadButton(albumItem, 'check', downloadCheckbox, albumItem);
-        }
-      });
-
-      const allDownloadCheckboxes = messageBubble.querySelectorAll('.download-checkbox-all');
-
-      if (allDownloadCheckboxes.length === 0 && messageBubble.querySelector('.album-item') !== null) {
-        appendDownloadButton(messageBubble, 'downloadAll', allFilesDownloadButton, messageBubble);
-
-        messageBubble.querySelectorAll('.download-checkbox-all').forEach((checkbox) => {
-          const parentContainer = checkbox.parentNode.parentNode;
-
-          checkbox.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
-            const individualDownloadCheckboxes = parentContainer.querySelectorAll('.download-check-item');
-            let downloadChain = Promise.resolve();
-
-            individualDownloadCheckboxes.forEach((checkbox, itemIndex) => {
-              if (checkbox.checked) {
-                const videoTimeIndicator = checkbox.parentNode.querySelector('.video-time');
-
-                if (videoTimeIndicator === null) {
-                  const imageUrl = checkbox.parentNode.querySelector('.media-photo').src;
-                  handleVideoDownload('single', imageUrl, imageUrl, itemIndex + 1, 'image', messageBubble);
-                } else {
-                  downloadChain = downloadChain.then(() => processAlbumMedia(checkbox, itemIndex, messageBubble));
-                }
-              }
-            });
-          });
-        });
-      }
-    });
-  };
-
-  const fetchBlobAsync = async (url) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      return blob;
-    } catch (error) {
-      throw (console.error('Fetch error:', error), error);
-    }
-  };
-  let g = [];
-  const processMediaElementsAsync = async () => {
-    const bubbleContentWrappers = document.querySelectorAll('.bubble-content-wrapper');
-    let mediaDetails = [];
-
-    for (let index = 0; index < bubbleContentWrappers.length; index++) {
-      const wrapper = bubbleContentWrappers[index];
-      const imageElement = wrapper.querySelector('.media-photo');
-      const videoElement = wrapper.querySelector('.media-video');
-      const videoTimeElement = wrapper.querySelector('.video-time');
-
-      if (imageElement !== null && videoTimeElement === null) {
-        try {
-          const imageBlob = await fetchBlobAsync(imageElement.src);
-          const imageSizeMB = (imageBlob.size / 1048576).toFixed(2);
-          const imageDetails = {
-            index: index,
-            fileName: imageElement.src,
-            type: 'image',
-            size: imageSizeMB + 'MB'
-          };
-          mediaDetails.push(imageDetails);
-        } catch (error) {
-          console.error('Error fetching image:', error);
-        }
-      }
-
-      if (videoElement !== null) {
-        try {
-          const streamIndex = videoElement.src.indexOf('stream/') + 'stream/'.length;
-          const encodedVideoData = videoElement.src.substring(streamIndex);
-          const decodedVideoData = decodeURIComponent(encodedVideoData);
-          const videoData = JSON.parse(decodedVideoData);
-          const videoSizeMB = (videoData.size / 1048576).toFixed(2);
-          const videoDetails = {
-            index: index,
-            fileName: imageElement.src,
-            videoUrl: videoElement.src,
-            type: videoData.mimeType,
-            size: videoSizeMB + 'MB',
-            videoObj: videoData
-          };
-          mediaDetails.push(videoDetails);
-        } catch (error) {
-          console.error('Error fetching video:', error);
-        }
-      }
-    }
-
-    if (mediaDetails.length > 0) {
-      g = mediaDetails;
-    }
-  };
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if ('executeScript' === message.action) {
-      const videoDetails = {
-        type: message.data.type_tent,
-        video_src: {
-          video_url: message.data.url_tent,
-          video_id: message.data.id_tent,
-          page: message.data.current_url_tent,
-          download_id: message.data.bin_index_tent
-        }
-      };
-      const videoDownloadEvent = new CustomEvent('video_download', { detail: videoDetails });
-      document.dispatchEvent(videoDownloadEvent);
-    } else if ('popupSendData' === message.action) {
-      sendResponse({ data: g });
-    } else {
-      console.log('content-teleram-not-find');
-    }
-    return true;
-  });
-  setInterval(() => {
-    initializeDownloadHandlers();
-    processMediaElementsAsync();
-  }, 5000);
-})();
+  .slide-in {
+    animation: slideInRight 0.5s forwards;
+  }
+`;document.head.appendChild(X);Object.assign(v.style,{position:"fixed",right:"0px",bottom:"20px",width:"400px",height:"600px",border:"none","z-index":"2147483647","box-shadow":"0 0 10px rgba(0,0,0,0.2)","border-radius":"8px",transform:"translateX(0)",opacity:"1"});const I=document.createElement("button");Object.assign(I.style,{position:"fixed",right:"20px",bottom:"20px","z-index":"2147483647",padding:"8px 16px","border-radius":"4px",background:"#008aff",color:"white",border:"none",cursor:"pointer"});I.textContent="Toggle Panel";document.body.appendChild(I);const C=document.createElement("button");Object.assign(C.style,{position:"fixed",right:"20px",top:"20px","z-index":"2147483647",padding:"8px 16px","border-radius":"4px",background:"#008aff",color:"white",border:"none",cursor:"pointer"});C.textContent="调整宽度";document.body.appendChild(C);(()=>{let x=!0,b=!1,g=!1;const O=()=>{b||(b=!0,x?(v.classList.add("slide-out"),I.textContent="任务列表"):(v.style.display="block",v.classList.add("slide-in"),I.textContent="任务列表"),v.addEventListener("animationend",()=>{v.classList.remove(x?"slide-out":"slide-in"),x&&(v.style.display="none"),x=!x,b=!1},{once:!0}))};O();const N=()=>{if(g)v.style.width="400px",C.textContent="调整宽度";else{const t=document.getElementById("column-center");t&&(v.style.width=t.clientWidth+"px",C.textContent="恢复原宽度")}g=!g};I.addEventListener("click",O),C.addEventListener("click",N),document.body.appendChild(v),document.addEventListener("keydown",t=>{t.key==="Escape"&&x&&O()});const $=chrome.runtime.id;console.log("当前扩展ID:",$),window.addEventListener("message",t=>{const e="chrome-extension://"+$;t.origin===e&&(t.data.type==="closeIframe"&&O(),t.data.type==="fullScreenContainer"&&N())});let z="zh-CN";const P={zh:{dialog:{title:"电报视频下载器",context:"你的五星好评是我们前进最大的动力🙏",loading:"正在检测中，请勿关闭当前页面！",sure:"支持一下",confirm:"残忍拒绝",butImg:"下载图片",butVideo:"下载视频",butAllFile:"强制下载",progressText:"下载进度："}},en:{dialog:{title:"Telegram Video Downloader",context:"Your 5-star rating is our biggest motivation! 🙏",loading:"Under detection, please do not close the current page!",sure:"Show Support",confirm:"No Thanks",butImg:"DOWNLOAD IMAGE",butVideo:"DOWNLOAD VIDEO",butAllFile:"FORCE DOWNLOAD",progressText:"Download progress:"}}};let T;function J(){return z.includes("zh")?P.zh:P.en}function G(){const t=navigator.language;t&&(z=t)}G(),T=J();const Y=`
+    <div class="content-teleram-script">
+      <div class="downloadBtnIns" style="max-width: 420px; display: flex; justify-content: center;">
+        <button class="download-images  down_btn_img" data-text="FORCE DOWNLOAD" title="Download all resources by default, or please select the resources you want to download in batches" style="color: white; background-color: #008aff; border-radius: 5px;">
+        ${T.dialog.butImg}
+        </button>
+      </div>
+    </div>
+    `,R=`
+    <div class="content-teleram-script">
+      <div class="downloadBtnIns" style="max-width: 420px; display: flex; justify-content: center;">
+        <button class="download-videos down_btn_video" data-text="FORCE DOWNLOAD" title="Download all resources by default, or please select the resources you want to download in batches" style="color: white; background-color: #008aff; border-radius: 5px;">
+        ${T.dialog.butVideo}
+        </button>
+      </div>
+    </div>
+    `,K=`
+    <div class="content-teleram-script down_btn_progress"></div>
+    `,Q='<input type="checkbox" class="download-check-item" name="checkbox-down" checked="true" />',Z=`
+    <div style="max-width: 420px; display: flex; justify-content: center;" class="check-all-download">
+        <button class="download-checkbox-all" data-text="FORCE DOWNLOAD" title="Download all resources by default, or please select the resources you want to download in batches" style="color: white; background-color: #008aff; border-radius: 5px; padding: 5px 10px;">
+        ${T.dialog.butAllFile}
+        </button>
+    </div>
+    `,ee='<div class="status-box"/> <div class="download-status"/></div>',q=(t,e,n,i)=>{let r=null;const s=t.querySelector(".down_btn_"+e);if(r=i!=="attachment"?i:t,!s){const o=document.createElement("div");o.className=`${e}-telegram-script`;const a=U();o.innerHTML=n.trim();const f=o.querySelector(".download-check-item");if(f==null||f.setAttribute("id",a),r&&(r.appendChild(o.firstChild),f)){const l=document.createElement("div");l.className=`${e}-telegram-script`;const m=U();l.innerHTML=ee.trim();const c=l.querySelector(".status-box");c.id=m,r.appendChild(l.firstChild)}}},te=t=>{const e=k(t,".script_status_success");e.style.display="none";const n=k(t,".script_status_error");n.style.display="none";const i=k(t,".script_status_running");i.style.display="none"},oe=(t,e)=>{const n=document.getElementById(t),i=k(n,".download-status");if(n)switch(te(n),e){case"success":i.setAttribute("class","download-status status-success");break;case"error":i.setAttribute("class","download-status status-error");break}},V=(t,e,n,i)=>{if(console.log("%c sendMessageToIframe","color: red; font-weight: bold;",t,e,n,i),!e)return;const r=document.getElementById("task-list-iframe");console.log("%c iframe","color: red; font-weight: bold;",r),r!=null&&r.contentWindow&&(console.log("%c iframe.contentWindow","color: red; font-weight: bold;",r.contentWindow),r.contentWindow.postMessage({type:t,id:e,status:n,info:i},"*"))},L=(t,e,n=15e3)=>new Promise((i,r)=>{const s=Array.from(t.querySelectorAll(e));if(s.length>0)return i(s);const o=new MutationObserver(a=>{const f=Array.from(t.querySelectorAll(e));f.length>0&&(o.disconnect(),i(f))});o.observe(t,{childList:!0,subtree:!0}),setTimeout(()=>{o.disconnect(),r(new Error(`元素 ${e} 加载超时`))},n)}),ne=(t,e=15e3)=>new Promise((n,i)=>{const r=document.querySelector(t);if(r)return n(r);const s=new MutationObserver(o=>{const a=document.querySelector(t);a&&(s.disconnect(),n(a))});s.observe(document.body,{childList:!0,subtree:!0}),setTimeout(()=>{s.disconnect(),i(new Error(`元素 ${t} 加载超时`))},e)}),re=(t,e=100)=>new Promise((n,i)=>{if(!t)return i(new Error("无效的视频元素"));const r=setInterval(()=>{(t.src.includes("blob")||t.src.includes("stream"))&&(clearInterval(r),clearTimeout(s),n(t.src))},e),s=setTimeout(()=>{clearInterval(r),i(new Error("等待视频源超时"))},1e4)}),ie=async()=>{try{return await navigator.clipboard.readText()}catch{return null}},A=async(t,e,n,i,r,s,o={})=>{console.log("执行handleVideoDownload");let a=0;const f=500;let l=new Date().getTime();if(l-a<f)return;a=l;let m="";if(r==="video"){const c=e.indexOf("stream/")+7,d=e.substring(c),p=decodeURIComponent(d);console.log("decodedVideoId",p),m=JSON.parse(p).location.id}if(document.addEventListener(m+"video_download_progress",c=>{console.log("video_download_progress",c);const d=s.querySelector(".down_btn_progress"),p=s.querySelector(".down_btn_video"),u=s.querySelector(".check-all-download");if(c.detail.progress!==null&&c.detail.progress!=="100"&&s!==null){V("down_task_status",c.detail.task_id,"downloading",c.detail.progress);let h=0;if(p!==null&&(p.style.display="none",h=c.detail.progress),u!==null&&(u.style.display="none",h=Math.max(-1,parseInt(c.detail.progress))),d===null){const w=document.createElement("div");w.className="progress-teleram-script",w.innerHTML=K.trim(),s.appendChild(w)}else d.style.display="block",d.innerHTML=`${T.dialog.progressText} ${h}%`}else p!==null&&(p.style.display="block"),u!==null&&(u.style.display="flex"),d!==null&&(d.style.display="none");c.detail.progress==="100"&&(V("down_task_status",c.detail.task_id,"completed",c.detail.progress),oe(c.detail.task_id,"success"))}),console.log("%c options","color: red; font-weight: bold;",o),o!=null&&o.taskId){const c=await ie(),d={type:t,video_src:{video_url:e,video_id:m,page:n,download_id:i,fileName:c,taskId:o.taskId}};window.postMessage(d,"*"),V("add_task",o.taskId,"pending",o.mediaPhotoSrc)}},W=(t,e,n,i)=>{const r=k(t,".down_btn_"+n);if(r&&e){const s=window.location.href,o=s.indexOf("#");s.substring(0,o),r.addEventListener("click",a=>{a.preventDefault(),a.stopPropagation(),n==="video"?A("single",e.src,s,String(i+1),"video",t):n==="img"?A("single",e.src,s,String(i+1),"image",t):console.error("Unsupported media type:",n)})}},F=(t,e=500)=>new Promise((n,i)=>{t.click(),setTimeout(n,e)}),se=(t,e,n)=>new Promise((i,r)=>{(async()=>{var s;try{const o=t.parentNode,a=o.querySelector(".status-box"),f=(a==null?void 0:a.getAttribute("id"))||void 0,l=k(o,".album-item-media"),m=((s=l.querySelector(".media-photo"))==null?void 0:s.getAttribute("src"))||"";l.click();const c=await ne(".media-viewer-movers");if(c instanceof Error)throw c;const p=(await L(c,".media-viewer-aspecter video"))[0];console.log("videoElement:",p);const u=await re(p);if(u instanceof Error)throw u;if(console.log("videoSrc:",u),u.includes("blob")){console.log("检测到blob视频源");const D=(await L(document,".quality-download-options-button-menu"))[0],E=3;let y=0;await(async()=>{for(;y<E;)try{await F(D,300),console.log(`第 ${y+1} 次点击下载菜单`);const S=await Promise.race([L(D,".btn-menu-item",1e3),new Promise((M,_)=>setTimeout(()=>_(new Error("菜单项加载超时")),1e3))]);if(S.length>0){await F(S[0],100),console.log("已选择下载选项");return}}catch(S){console.warn(`菜单操作失败（尝试 ${y+1}/${E}）:`,S),y++,await new Promise(M=>setTimeout(M,500*Math.pow(2,y)))}throw new Error(`连续 ${E} 次尝试打开菜单失败`)})()}else console.log("检测到stream视频源，开始下载 handleVideoDownload"),A("single",u,window.location.href,e+1,"video",n,{taskId:f,mediaPhotoSrc:m});const h=()=>{const w=document.querySelector(".media-viewer-topbar");w==null||w.click(),console.log("已关闭视频查看器")};setTimeout(()=>{h(),i()},500)}catch(o){console.error("处理相册媒体时出错:",o),r(o)}finally{const o=document.querySelector(".media-viewer-topbar");o==null||o.click()}})()}),ce=()=>{document.querySelectorAll(".bubble-content-wrapper").forEach((e,n)=>{const i=e.querySelector(".media-photo"),r=e.querySelector(".content-teleram-script"),s=e.querySelector(".media-video"),o=e.querySelectorAll(".album-item"),a=e.querySelector(".video-time");if(r===null&&o.length===0&&i!==null){if(s!==null&&a!==null&&(q(e,"video",R,"attachment"),W(e,s,"video",n)),a!==null&&s===null){q(e,"video",R,"attachment");const l=k(e,".down_btn_video");l==null||l.addEventListener("click",m=>{console.log("messageBubble   click"),m.preventDefault(),m.stopPropagation();const c=k(e,".media-photo"),d=c.src;c==null||c.click(),setTimeout(()=>{const p=k(document,".media-viewer-movers"),u=ue(p,".media-viewer-aspecter video");if(u.src.includes("blob"))L(document,".quality-download-options-button-menu").then(h=>{setTimeout(()=>{const w=h[0];w.click(),console.log("button-menu click"),L(w,".btn-menu-item").then(D=>{setTimeout(()=>{var E;(E=D[0])==null||E.click(),console.log("elements[0] click"),setTimeout(()=>{const y=k(document,".media-viewer-topbar");y==null||y.click(),console.log("关闭blob视频查看器")},500)},100)})},100)});else{A("single",u.src,window.location.href,String(n+1),"video",e,{mediaPhotoSrc:d});const h=k(document,".media-viewer-topbar");h==null||h.click()}},800)})}a===null&&s===null&&(q(e,"img",Y,"attachment"),W(e,i,"img",n))}o.forEach(l=>{l.querySelector(".download-check-item")||q(l,"check",Q,l)}),e.querySelectorAll(".download-checkbox-all").length===0&&e.querySelector(".album-item")!==null&&(q(e,"downloadAll",Z,e),e.querySelectorAll(".download-checkbox-all").forEach(l=>{var c;const m=(c=l.parentNode)==null?void 0:c.parentNode;l.addEventListener("click",async d=>{d.preventDefault(),d.stopPropagation();const p=m.querySelectorAll(".download-check-item"),u=Array.from(p);let h=Promise.resolve();h=u.reduce(async(w,D,E)=>{var S,M;const y=D;if(!y.checked)return w;if(await w,((S=y.parentNode)==null?void 0:S.querySelector(".video-time"))===null){const _=((M=y.parentNode)==null?void 0:M.querySelector(".media-photo")).src;A("single",_,_,String(E+1),"image",e)}else try{await se(y,String(E+1),e)}catch(_){console.error(`相册项 ${E} 下载失败:`,_)}},Promise.resolve()),h.then(()=>console.log("所有下载任务完成")).catch(w=>console.error("下载链意外终止:",w))})}))})},le=async t=>{try{return await(await fetch(t)).blob()}catch(e){throw console.error("Fetch error:",e),e}};let H=[];const ae=async()=>{var n,i;const t=document.querySelectorAll(".bubble-content-wrapper");let e=[];for(let r=0;r<t.length;r++){const s=t[r],o=s.querySelector(".media-photo"),a=s.querySelector(".media-video"),f=s.querySelector(".video-time");if(o!==null&&f===null)try{const m=((await le(o.src)).size/1048576).toFixed(2),c={index:r,fileName:o.src,type:"image",size:m+"MB"};e.push(c)}catch(l){console.error("Error fetching image:",l)}if(a!==null)try{const l=((n=a.src)==null?void 0:n.indexOf("stream/"))+7,m=(i=a.src)==null?void 0:i.substring(l),c=decodeURIComponent(m),d=JSON.parse(c),p=(d.size/1048576).toFixed(2),u={index:r,fileName:o==null?void 0:o.src,videoUrl:a.src,type:d.mimeType,size:p+"MB",videoObj:d};e.push(u)}catch(l){console.error("Error fetching videoDetails:",l)}}e.length>0&&(H=e)};chrome.runtime.onMessage.addListener((t,e,n)=>{if(t.action==="executeScript"){const i={type:t.data.type_tent,video_src:{video_url:t.data.url_tent,video_id:t.data.id_tent,page:t.data.current_url_tent,download_id:t.data.bin_index_tent}};console.log("来自后台的消息 videoDetails",i);const r=new CustomEvent("video_download",{detail:i});document.dispatchEvent(r)}else t.action==="popupSendData"?n({data:H}):console.log("content-teleram-not-find");return!0}),setInterval(()=>{ce(),ae()},5e3)})();
+//# sourceMappingURL=content.js.map
