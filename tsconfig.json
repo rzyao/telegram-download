@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src"
+    ],
     "types": [
       "chrome"
     ],
     "outDir": "./extension/js",
     "target": "es2015",
-    "module": "commonjs",
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "module": "esnext",
     "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
@@ -27,9 +28,10 @@
   },
   "include": [
     "src/popup.js",
-    "src/inject.js",
+    "src/inject.ts",
     "src/background.js",
-    "src/content.ts"
+    "src/content.ts",
+    "src/global.d.ts"
   ],
   "exclude": [
     "node_modules"

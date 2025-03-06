@@ -47,7 +47,7 @@
           <!-- 操作列 -->
           <el-table-column label="操作" width="80" fixed="right">
             <template #default="{ row }">
-              <el-button :disabled="row.status === 'pending' || row.status === 'processing' " type="primary" size="small" @click.stop="handleAction(row)">重试</el-button>
+              <el-button :disabled="row.status === 'pending' || row.status === 'processing' " type="primary" size="small" @click.stop="handleRetry(row)">重试</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -56,7 +56,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, h, onMounted, onBeforeUnmount } from 'vue';
 import { Picture, FullScreen, DArrowRight } from '@element-plus/icons-vue';
 import { ElNotification } from 'element-plus';
@@ -77,9 +77,18 @@ const statusTagType = {
 };
 
 // 模拟数据
-const tasks = ref([]);
+const tasks = ref<any[]>([]);
 
 const loading = ref(false);
+
+const log = {
+  info: (msg, context = null) => {
+    console.log(`%c[iframe] ${msg}`, 'color: red;',context);
+  },
+  error: (msg, context = null) => {
+    console.warn(`%c[iframe] ${msg}`, 'color: red;', context);
+  }
+}
 
 // 单元格样式设置函数，用于图片列
 const imageCellStyle = ({ row, column, rowIndex, columnIndex }) => {
@@ -100,16 +109,6 @@ const tableRowClassName = ({ rowIndex }) => {
   return rowIndex % 2 === 1 ? 'stripe-row' : '';
 };
 
-// 操作处理
-const handleAction = (row) => {
-  window.parent.postMessage(
-    {
-      type: 'downloadTask',
-      content: row
-    },
-    'https://web.telegram.org/*'
-  );
-};
 
 // 行点击处理
 const handleRowClick = (row, column, event) => {
@@ -143,13 +142,21 @@ const fullScreenContainer = () => {
   );
 };
 
+// 重试任务
+const handleRetry = (task) => {
+  log.info('handleRetry', task);
+  window.parent.postMessage(
+    {
+      type: 'downloadTask',
+      content: task.detail
+    },
+    'https://web.telegram.org/*'
+  );
+};
+
 // 定义消息处理函数
 const handleMessage = (event) => {
-  console.log('%c收到消息:', 'color: red; font-weight: bold;', event.data);
-  console.log('%c收到消息', 'color: red; font-weight: bold;', event.origin);
-  console.log(event.origin !== 'https://web.telegram.org');
   if (event.origin !== 'https://web.telegram.org') return;
-  console.log('%c收到  https://web.telegram.org 消息', 'color: red; font-weight: bold;');
   switch (event.data.type) {
     case 'add_task':
       addTask(event.data);
@@ -161,28 +168,39 @@ const handleMessage = (event) => {
 };
 
 // 添加任务
-const addTask = (task) => {
-  const { id, status, info } = task;
-  console.log('%c addTask', 'color: red; font-weight: bold;', task);
-  tasks.value.unshift({ id, status, img: info });
-  console.log('%c tasks', 'color: red; font-weight: bold;', tasks.value);
+const addTask = (task: any) => {
+  const { id, status, info, url, detail } = task;
+  log.info('addTask', task);
+  tasks.value.unshift({ id, status, img: info, url, detail });
 };
 
 // 修改任务
-const modifyTask = (task) => {
-  console.log('%c modifyTask', 'color: red; font-weight: bold;', task);
+const modifyTask = (task: any) => {
+  log.info('modifyTask', task);
   const { id, status, info } = task;
-  tasks.value = tasks.value.map((t) => (t.id === id ? { ...t, status, info: info + '%' } : t));
+  tasks.value = tasks.value.map((t: any) => (t.id === id ? { ...t, status, info: info + '%' } : t));
+};
+
+// 提取公共错误处理函数
+const handleResizeObserverError = (e: any) => {
+  if (e && e.message && e.message.includes('ResizeObserver')) {
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+  }
 };
 
 // 组件挂载后注册消息事件监听器
 onMounted(() => {
   window.addEventListener('message', handleMessage);
+  // 添加错误监听（使用统一处理函数）
+  window.addEventListener('error', handleResizeObserverError, true);
 });
 
 // 组件卸载前移除消息事件监听器
 onBeforeUnmount(() => {
   window.removeEventListener('message', handleMessage);
+  // 移除错误监听（使用统一处理函数）
+  window.removeEventListener('error', handleResizeObserverError, true);
 });
 </script>
 

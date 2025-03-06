@@ -1,0 +1,23 @@
+{
+  "printWidth": 100,
+  "arrowParens": "always",
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "semi": true,
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.tsx"
+      ],
+      "options": {
+        "functionParameters": {
+          "expand": true
+        }
+      }
+    }
+  ]
+}

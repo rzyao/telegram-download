@@ -16,8 +16,7 @@
             "css/teleram/content-teleram.css"
          ],
          "js": [
-            "js/content.js",
-            "js/inject.js"
+            "js/content.js"
          ],
          "matches": [
             "https://web.telegram.org/*"
