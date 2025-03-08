@@ -5,10 +5,13 @@ node_modules/
 *.log
 
 # 忽略编译产物
-dist/
+extension/
 
 # 忽略临时文件
 tmp/
 
 # 忽略配置文件（如本地配置）
 config/local.config.js 
+
+# 忽略 .env 文件
+.env

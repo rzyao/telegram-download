@@ -1,0 +1,11 @@
+{
+   "appAction": {
+      "message": "Telegrami piiratud video allalaadimine"
+   },
+   "appDescription": {
+      "message": "salvesta piiratud sisu Telegramist, salvesta gifid/fotod/pildid/videod/audiod Telegrami gruppidest ja kanalitest, nagu piiratud sisu salvestamise bot."
+   },
+   "appName": {
+      "message": "Telegrami piiratud video allalaadimine"
+   }
+}

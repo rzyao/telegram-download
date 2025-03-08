@@ -5,7 +5,8 @@
       "./src"
     ],
     "types": [
-      "chrome"
+      "chrome",
+      "node"
     ],
     "outDir": "./extension/js",
     "target": "es2015",
@@ -27,11 +28,11 @@
     ]
   },
   "include": [
-    "src/popup.js",
-    "src/inject.ts",
-    "src/background.js",
-    "src/content.ts",
-    "src/global.d.ts"
+    "src/js/popup.js",
+    "src/js/inject.ts",
+    "src/js/background.js",
+    "src/js/content.ts",
+    "src/js/global.d.ts"
   ],
   "exclude": [
     "node_modules"

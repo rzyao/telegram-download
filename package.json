@@ -4,20 +4,18 @@
     "@rollup/plugin-terser": "^0.4.4",
     "core-js": "^3.41.0",
     "element-plus": "^2.9.5",
-    "regenerator-runtime": "^0.14.1",
-    "vue-virtual-scroll-list": "^2.3.5"
+    "regenerator-runtime": "^0.14.1"
   },
   "scripts": {
-    "dev": "vite build --config vite.config.ts --mode development",
-    "build": "vite build --config vite.config.ts --mode production"
+    "dev": "vite",
+    "build:dev": "vite build --config vite.config.ts --mode development",
+    "build:prod": "vite build --config vite.config.ts --mode production"
   },
   "devDependencies": {
-    "@rollup/plugin-strip": "^3.0.4",
     "@types/chrome": "^0.0.307",
+    "@types/node": "^22.13.9",
     "@vitejs/plugin-vue": "^5.2.1",
-    "javascript-obfuscator": "^4.1.1",
-    "rollup-plugin-obfuscator": "^1.1.0",
-    "rollup-plugin-strip": "^1.2.2",
+    "rollup-plugin-copy": "^3.5.0",
     "typescript": "^5.8.2",
     "unplugin-element-plus": "^0.9.1",
     "vite": "^6.2.0",

@@ -327,7 +327,7 @@ function waitForElements(container, selector, timeout = 15e3) {
 injectScript("js/inject.js");
 const localizedText = initLocalization();
 injectAnimationStyle();
-const iframe = initIframe("task-list-iframe", "../html/content.html");
+const iframe = initIframe("task-list-iframe", "../iframe/iframe.html");
 let isVisible = false;
 let isAnimating = false;
 let isWide = false;
@@ -604,7 +604,6 @@ const initializeDownloadHandlers = (htmlTemplate2, localizedText2) => {
   console.log("messageBubbles", messageBubbles);
   messageBubbles.forEach((messageBubble, index) => {
     var _a;
-    messageBubble.setAttribute("id", generateUniqueId());
     const imageElement = messageBubble.querySelector(".media-photo");
     const scriptContent = messageBubble.querySelector(".content-teleram-script");
     const videoElement = messageBubble.querySelector(".media-video");
@@ -751,4 +750,3 @@ const initializeDownloadHandlers = (htmlTemplate2, localizedText2) => {
 setInterval(() => {
   initializeDownloadHandlers(htmlTemplate, localizedText);
 }, 5e3);
-//# sourceMappingURL=content.js.map
